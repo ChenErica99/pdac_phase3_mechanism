@@ -1,0 +1,4 @@
+label	n	coef_hypoxia_z	pval_hypoxia_z	coef_acinar_z	pval_acinar_z	coef_interaction	pval_interaction	coef_purity	pval_purity	coef_grade	pval_grade	coef_stage	pval_stage	r_squared
+umich_protein	140	-0.10152	0.309193	0.48199	0.0	0.0433	0.773844	-1.03815	0.023563	0.03493	0.715638	-0.07939	0.243571	0.3883
+bcm_protein	105	-0.07006	0.490589	0.59977	0.0	0.08088	0.659668	-1.69782	0.001924	0.08674	0.362042	-0.04938	0.475124	0.4088
+washu_rna	140	-0.09501	0.562812	1.7215	0.0	0.79064	0.001762	1.08026	0.150165	-0.2394	0.131039	0.00582	0.958491	0.7081

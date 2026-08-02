@@ -1,3 +1,3 @@
 source	gene	n_paired_rna_protein	rna_protein_spearman_rho	rna_protein_spearman_p	protein_n_aggressive	protein_n_reference	protein_median_aggressive	protein_median_reference	protein_direction	protein_p_value	rna_n_aggressive	rna_n_reference	rna_median_aggressive	rna_median_reference	rna_direction	rna_p_value	rna_and_protein_concordant_direction
-umich	ACADL	140	0.6268	0.0	46	46	-1.3181	-0.6142	down	0.0	46	46	0.3591	2.4165	down	0.0	True
-bcm	ACADL	105	0.5683	0.0	41	23	23.0659	23.678	down	2.2e-05	41	23	0.3899	1.933	down	0.0	True
+umich	ACADL	140	0.6268	0.0	47	47	-1.2571	-0.6148	down	0.0	47	47	0.3358	2.3165	down	0.0	True
+bcm	ACADL	105	0.5683	0.0	41	26	23.1488	23.7212	down	0.0	41	26	0.3096	1.9001	down	0.0	True

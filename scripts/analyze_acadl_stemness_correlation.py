@@ -174,23 +174,28 @@ def analyze_cohort(cohort, stemness_genes):
 
 
 def make_scatter(name, plot_data):
-    genes = [g for g in FAO_GENES_OF_INTEREST if g in plot_data]
-    if not genes:
-        return
-    fig, axes = plt.subplots(1, len(genes), figsize=(5.5 * len(genes), 4.5))
-    if len(genes) == 1:
-        axes = [axes]
-    for ax, gene in zip(axes, genes):
+    """Separate single-gene figures: ACADL -> main Figure 6, CPT1A -> Supplementary
+    Figure S2, per the manuscript's decision to report CPT1A only in Supplementary
+    Results (pseudoreplication concern on the CPT1A cell-level correlations) rather
+    than as a co-equal main-text panel next to ACADL."""
+    FIGURE_FILE_STEM = {
+        "ACADL": ("Figure_ACADL_stemness_correlation", "ACADL"),
+        "CPT1A": ("FigureS2_CPT1A_stemness_correlation", "CPT1A (Supplementary)"),
+    }
+    for gene, (stem, label) in FIGURE_FILE_STEM.items():
+        if gene not in plot_data:
+            continue
+        fig, ax = plt.subplots(figsize=(5.5, 4.5))
         ax.hexbin(plot_data["stemness_score"], plot_data[gene], gridsize=40, cmap="viridis", mincnt=1)
         ax.set_xlabel("Stemness score (PROM1/CD44/NANOG/KLF4/POU5F1/SOX2)")
         ax.set_ylabel(f"{gene} expression")
-        ax.set_title(gene)
-    fig.suptitle(f"{name}: FAO gene expression vs stemness score (malignant cells)", fontsize=11)
-    plt.tight_layout()
-    path = os.path.join(FIGURES_DIR, f"Figure_ACADL_stemness_correlation_{name}.pdf")
-    plt.savefig(path, bbox_inches="tight")
-    plt.close()
-    print(f"  Scatter saved: {path}")
+        ax.set_title(f"{name}: {label} vs stemness (malignant cells)", fontsize=10)
+        plt.tight_layout()
+        path = os.path.join(FIGURES_DIR, f"{stem}_{name}.pdf")
+        plt.savefig(path, bbox_inches="tight")
+        plt.savefig(path.replace(".pdf", ".png"), bbox_inches="tight", dpi=200)
+        plt.close()
+        print(f"  Scatter saved: {path}")
 
 
 def main():

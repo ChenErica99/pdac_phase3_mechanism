@@ -3,6 +3,13 @@ analyze_cptac_protein.py
 Protein-level validation of lipid rewiring genes using real CPTAC-PDA data.
 Uses the cptac Python package (source: umich proteomics + washu transcriptomics).
 Group assignment via hypoxia/acinar scores computed from matched RNA-seq.
+
+RESOLVED (2026-07-26): assign_groups() previously averaged raw transcriptomic
+values without gene-wise z-scoring, contradicting the manuscript Methods
+("mean of gene-wise z-scores"). Fixed to match Phase 2's scoring method (see
+zscore_genes()), and every downstream table/figure in this script has been
+regenerated from the corrected group assignments. All CPTAC-dependent results
+in the manuscript (Sections 2.5-2.9 / Figures 4-7) reflect this rerun.
 """
 
 import os
@@ -110,6 +117,16 @@ def load_proteomics(pdac, source):
     return prot
 
 
+def zscore_genes(df):
+    """Z-score each gene (column) across samples, matching the Methods-
+    specified 'mean of gene-wise z-scores' scoring used by Phase 2's
+    score_validation_cohorts.py (zscore_genes there z-scores across the
+    sample axis before averaging into a composite score)."""
+    mean = df.mean(axis=0)
+    std = df.std(axis=0).replace(0, np.nan)
+    return (df - mean) / std
+
+
 def assign_groups(trans):
     """Assign hypoxia-high/acinar-low groups using Phase 2 gene set scoring."""
     print("  Computing hypoxia and acinar scores from transcriptomics...")
@@ -120,8 +137,14 @@ def assign_groups(trans):
     print(f"  Hypoxia genes found: {len(hyp_avail)}/{len(HYPOXIA_GENES)}: {hyp_avail}")
     print(f"  Acinar genes found: {len(acin_avail)}/{len(ACINAR_GENES)}: {acin_avail}")
 
-    hypoxia_score = trans[hyp_avail].mean(axis=1)
-    acinar_score = trans[acin_avail].mean(axis=1)
+    # Gene-wise z-score each marker across samples before averaging, per
+    # Methods ("mean of gene-wise z-scores"). Previously this averaged raw
+    # expression directly, which let genes with larger absolute scale
+    # dominate the composite score instead of contributing equally.
+    hyp_z = zscore_genes(trans[hyp_avail])
+    acin_z = zscore_genes(trans[acin_avail])
+    hypoxia_score = hyp_z.mean(axis=1)
+    acinar_score = acin_z.mean(axis=1)
 
     # Median split (same as Phase 2)
     hyp_median = hypoxia_score.median()
@@ -410,6 +433,7 @@ def make_replication_figure(umich_df, bcm_df):
     plt.tight_layout()
     path = os.path.join(FIGURES_DIR, "Figure3F_CPTAC_lipid_protein_by_group.pdf")
     plt.savefig(path, bbox_inches="tight")
+    plt.savefig(path.replace(".pdf", ".png"), bbox_inches="tight", dpi=200)
     plt.close()
     print(f"  Figure saved: {path}")
 

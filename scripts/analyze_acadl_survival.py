@@ -48,7 +48,7 @@ import matplotlib.pyplot as plt
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESEARCH_DIR = os.path.dirname(BASE_DIR)
 PHASE2_DIR = os.path.join(RESEARCH_DIR, "pdac_phase2_validation", "data", "processed", "validation")
-PHASE1_DIR = os.path.join(RESEARCH_DIR, "Erica (1)", "data", "processed")
+PHASE1_DIR = os.path.join(RESEARCH_DIR, "pdac_phase1_discovery", "data", "processed")
 GSE21501_PARSED = os.path.join(BASE_DIR, "data", "processed", "GSE21501_clinical_expression.tsv")
 
 TABLES_DIR = os.path.join(BASE_DIR, "results", "tables")
@@ -116,6 +116,22 @@ def load_gse21501():
     return df
 
 
+def check_ph_assumption(cph, fit_df, covariate):
+    """Schoenfeld-residual proportional-hazards check (Limitations item: not
+    yet performed for any Cox model, flagged 2026-07-25/26). Returns the
+    rank-transform test p-value for the covariate (lifelines default
+    transform) plus a global (any-transform) verdict; a low p-value (<0.05)
+    indicates a covariate effect that changes over time, i.e. a PH violation."""
+    from lifelines.statistics import proportional_hazard_test
+    result = proportional_hazard_test(cph, fit_df, time_transform="rank")
+    row = result.summary.loc[covariate]
+    return {
+        "ph_test_p": round(float(row["p"]), 5),
+        "ph_test_stat": round(float(row["test_statistic"]), 4),
+        "ph_violation": bool(row["p"] < 0.05),
+    }
+
+
 def analyze_cohort(name, df):
     """Fit continuous and median-split Cox models; return a result dict plus
     the annotated dataframe (for the KM plot)."""
@@ -145,6 +161,7 @@ def analyze_cohort(name, df):
     p_c = float(s_c.loc["ACADL_z", "p"])
     log_hr_c = float(s_c.loc["ACADL_z", "coef"])
     se_c = float(s_c.loc["ACADL_z", "se(coef)"])
+    ph_c = check_ph_assumption(cph_c, df[["T", "E", "ACADL_z"]], "ACADL_z")
 
     # 2. Median-split Cox + log-rank (secondary)
     cph_m = CoxPHFitter()
@@ -154,13 +171,16 @@ def analyze_cohort(name, df):
     hr_m_lo = float(s_m.loc["ACADL_low", "exp(coef) lower 95%"])
     hr_m_hi = float(s_m.loc["ACADL_low", "exp(coef) upper 95%"])
     p_m = float(s_m.loc["ACADL_low", "p"])
+    ph_m = check_ph_assumption(cph_m, df[["T", "E", "ACADL_low"]], "ACADL_low")
 
     lr = logrank_test(df.loc[df["ACADL_low"] == 1, "T"], df.loc[df["ACADL_low"] == 0, "T"],
                        event_observed_A=df.loc[df["ACADL_low"] == 1, "E"],
                        event_observed_B=df.loc[df["ACADL_low"] == 0, "E"])
 
-    print(f"    Continuous:   HR/SD={hr_c:.3f} [{hr_c_lo:.3f}-{hr_c_hi:.3f}] p={p_c:.4f}")
-    print(f"    Median-split: HR(low vs high)={hr_m:.3f} [{hr_m_lo:.3f}-{hr_m_hi:.3f}] p={p_m:.4f} (log-rank p={lr.p_value:.4f})")
+    print(f"    Continuous:   HR/SD={hr_c:.3f} [{hr_c_lo:.3f}-{hr_c_hi:.3f}] p={p_c:.4f}  "
+          f"PH test p={ph_c['ph_test_p']:.4f}{' (VIOLATION)' if ph_c['ph_violation'] else ''}")
+    print(f"    Median-split: HR(low vs high)={hr_m:.3f} [{hr_m_lo:.3f}-{hr_m_hi:.3f}] p={p_m:.4f} (log-rank p={lr.p_value:.4f})  "
+          f"PH test p={ph_m['ph_test_p']:.4f}{' (VIOLATION)' if ph_m['ph_violation'] else ''}")
 
     return {
         "cohort": name,
@@ -178,6 +198,10 @@ def analyze_cohort(name, df):
         "hr_low_vs_high_upper95": round(hr_m_hi, 4),
         "p_median_split": round(p_m, 5),
         "logrank_p": round(lr.p_value, 5),
+        "ph_test_p_continuous": ph_c["ph_test_p"],
+        "ph_violation_continuous": ph_c["ph_violation"],
+        "ph_test_p_median_split": ph_m["ph_test_p"],
+        "ph_violation_median_split": ph_m["ph_violation"],
         "is_simulated": False,
     }, df
 
@@ -304,6 +328,18 @@ def main():
 
     print(f"\n--- GSE62165 ---\n  Excluded: 0/131 samples have survival_time/event in this pipeline "
           f"(unchanged since Phase 2 — the array series has no survival annotation available).")
+
+    if results:
+        print("\n--- Proportional-hazards assumption (Schoenfeld residuals, rank transform) ---")
+        n_viol_c = sum(r["ph_violation_continuous"] for r in results)
+        n_viol_m = sum(r["ph_violation_median_split"] for r in results)
+        for r in results:
+            flag_c = " <-- VIOLATION" if r["ph_violation_continuous"] else ""
+            flag_m = " <-- VIOLATION" if r["ph_violation_median_split"] else ""
+            print(f"  {r['cohort']}: continuous p={r['ph_test_p_continuous']:.4f}{flag_c}; "
+                  f"median-split p={r['ph_test_p_median_split']:.4f}{flag_m}")
+        print(f"  Summary: {n_viol_c}/{len(results)} continuous models and {n_viol_m}/{len(results)} "
+              f"median-split models show a PH violation at p<0.05.")
 
     if len(results) == 0:
         print("\nNo cohorts had sufficient data for a Cox fit. Exiting.")

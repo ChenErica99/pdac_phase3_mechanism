@@ -105,6 +105,7 @@ def concordance_for_source(source, prot, trans_acadl, group_df):
     plt.tight_layout()
     fig_path = os.path.join(FIGURES_DIR, f"Figure_ACADL_RNA_protein_scatter_{source}.pdf")
     plt.savefig(fig_path, bbox_inches="tight")
+    plt.savefig(fig_path.replace(".pdf", ".png"), bbox_inches="tight", dpi=200)
     plt.close()
     print(f"    Scatter saved: {fig_path}")
 
