@@ -1,0 +1,5 @@
+label	n	spearman_rho_y_vs_cnv	spearman_p_y_vs_cnv	coef_hypoxia_z	pval_hypoxia_z	coef_acinar_z	pval_acinar_z	coef_purity	pval_purity	coef_grade	pval_grade	coef_stage	pval_stage	coef_cnv	pval_cnv	r_squared
+washu_rna_vs_washu_cnv	140	-0.0531	0.533478	-0.29795	0.058639	1.43716	0.0	1.12753	0.148364	-0.26003	0.113995	-0.0123	0.91599	-0.75568	0.660922	0.6862
+umich_protein_vs_washu_cnv	140	-0.046	0.589152	-0.11118	0.226392	0.4651	0.0	-1.02739	0.025319	0.0326	0.733927	-0.07808	0.253984	-0.31325	0.756143	0.3883
+bcm_protein_vs_washu_cnv	105	0.0027	0.978062	-0.09254	0.292114	0.58514	0.0	-1.69753	0.001951	0.08813	0.355011	-0.05118	0.463562	-0.05503	0.952158	0.4077
+bcm_protein_vs_bcm_cnv	105	0.1355	0.168212	-0.09548	0.278907	0.58643	0.0	-1.69271	0.002002	0.09041	0.343503	-0.05533	0.430128	0.15981	0.782233	0.4081

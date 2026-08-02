@@ -1,0 +1,7 @@
+source	subset	n_aggressive	n_reference	median_aggressive	median_reference	direction	p_value	note
+umich	kras_mutant	44	45	-1.27	-0.6148	down	0.0	
+umich	kras_wt	3	2					too few samples to test
+bcm	kras_mutant	39	24	23.0659	23.7212	down	0.0	
+bcm	kras_wt	2	2					too few samples to test
+washu_rna	kras_mutant	44	45	0.3861	2.3165	down	0.0	
+washu_rna	kras_wt	3	2					too few samples to test

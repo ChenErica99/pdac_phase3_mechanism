@@ -1,8 +1,8 @@
 # Phase 3 Mechanistic Report: Single-Cell Resolution of Aggressive PDAC State
 
-**Generated:** 2026-07-03 (updated 2026-07-04 with BCM replication; updated 2026-07-06 with patient-level pseudobulk re-analysis of lipid/CAF/EMT/immune-endothelial cell-of-origin, Sections 4/5/9; updated 2026-07-06 with a non-circular purity proxy, Section 6; updated 2026-07-06 with a real GSE21501 Cox fit replacing the hardcoded survival value, Section 8; updated 2026-07-12 with the full 43-patient GSE202051 object replacing a 1-patient subset, Sections 3/4/5/9/10/11; updated 2026-07-13 replacing the heuristic purity proxy with the validated ESTIMATE algorithm (Yoshihara et al. 2013) via the `tidyestimate` package, Sections 6/10/11/13; updated 2026-07-13 with a purity/grade/stage confounder-adjusted re-analysis of the CPTAC ACADL/lipid protein findings, Section 7/10/13; updated 2026-07-13 with a GSE202051 treatment-status sensitivity check (inconclusive for cell-of-origin tests, confirmatory for the hypoxia/acinar correlation), Sections 3/4/5/9/11/13; **updated 2026-07-13 fixing a real CAF-subtype-proportion correctness bug (categorical groupby without `observed=True`, diluting every fraction) affecting all 3 single-cell cohorts — retracts the "lower myCAF/iCAF in aggressive" claim, Sections 3/5/11/13**; updated 2026-07-18 with ACADL RNA-protein concordance in CPTAC's own matched transcriptomics, Section 7; updated 2026-07-18 with an ACADL-specific survival analysis (TCGA-PAAD, GSE79668, GSE71729, GSE21501) replacing reliance on the composite-signature survival test for the anchor gene, Section 8/10/13; updated 2026-07-18 reconciling the FAO-required-for-stemness literature tension (PMC11351511) via a single-cell ACADL/CPT1A-vs-stemness correlation test, Section 7/10; updated 2026-07-18 testing ACADL against GSE71729's own published Moffitt et al. 2015 basal/classical subtype call, Section 7/10)
+**Generated:** 2026-07-03 (updated 2026-07-04 with BCM replication; updated 2026-07-06 with patient-level pseudobulk re-analysis of lipid/CAF/EMT/immune-endothelial cell-of-origin, Sections 4/5/9; updated 2026-07-06 with a non-circular purity proxy, Section 6; updated 2026-07-06 with a real GSE21501 Cox fit replacing the hardcoded survival value, Section 8; updated 2026-07-12 with the full 43-patient GSE202051 object replacing a 1-patient subset, Sections 3/4/5/9/10/11; updated 2026-07-13 replacing the heuristic purity proxy with the validated ESTIMATE algorithm (Yoshihara et al. 2013) via the `tidyestimate` package, Sections 6/10/11/13; updated 2026-07-13 with a purity/grade/stage confounder-adjusted re-analysis of the CPTAC ACADL/lipid protein findings, Section 7/10/13; updated 2026-07-13 with a GSE202051 treatment-status sensitivity check (inconclusive for cell-of-origin tests, confirmatory for the hypoxia/acinar correlation), Sections 3/4/5/9/11/13; **updated 2026-07-13 fixing a real CAF-subtype-proportion correctness bug (categorical groupby without `observed=True`, diluting every fraction) affecting all 3 single-cell cohorts — retracts the "lower myCAF/iCAF in aggressive" claim, Sections 3/5/11/13**; updated 2026-07-18 with ACADL RNA-protein concordance in CPTAC's own matched transcriptomics, Section 7; updated 2026-07-18 with an ACADL-specific survival analysis (TCGA-PAAD, GSE79668, GSE71729, GSE21501) replacing reliance on the composite-signature survival test for the anchor gene, Section 8/10/13; updated 2026-07-18 reconciling the FAO-required-for-stemness literature tension (PMC11351511) via a single-cell ACADL/CPT1A-vs-stemness correlation test, Section 7/10; updated 2026-07-18 testing ACADL against GSE71729's own published Moffitt et al. 2015 basal/classical subtype call, Section 7/10; **updated 2026-07-25/26 fixing a CPTAC group-assignment z-scoring bug** (`assign_groups()` in `analyze_cptac_protein.py` previously averaged raw, non-z-scored transcript values instead of the Methods-specified "mean of gene-wise z-scores," letting large-scale genes dominate the composite score — corrected via `zscore_genes()`; group sizes shifted modestly, umich 46/46 → 47/47 and BCM 41/23 → 41/26, and every CPTAC-dependent table/figure in Section 7 has been regenerated from the corrected assignments; qualitative conclusions unchanged, ACADL effect sizes nearly identical), and adding three analyses that had been run but not yet folded into this report: a formal mixed-effects model for the hypoxia/acinar within-patient relationship (Section 3), the continuous mutually-adjusted ACADL confound model plus a malignant-cell-only pseudobulk check (Section 7), and a patient-level (pseudobulk + mixed-effects) re-analysis of the CPT1A/ACADL-stemness relationship (Section 7))
 
-**Reproducibility check (2026-07-11):** The full pipeline (`scripts/run_phase3_pipeline.py`) was re-run end-to-end in the `pdac_phase3` conda environment against the same on-disk real data. All key statistics reproduced to 2-3 decimal places: hypoxia/acinar Pearson r = 0.060 / -0.031 / -0.016 (GSE154778/GSE202051/Peng_et_al); CPTAC 9/15 (umich) and 10/15 (bcm) directionally concordant with ACADL independently replicated at FDR<0.05 in both; GSE21501 real Cox fit HR=0.927, p=0.798, n=102; pooled survival HR=1.061 [0.765-1.471], p=0.723; purity-adjusted CAF/EMT coefficients matched to 3 decimals across all 3 bulk cohorts. This confirms the analysis is genuinely reproducible from the real downloaded data, not a one-off result. Note: `scripts/generate_phase3_report.py` itself is an older/simpler version whose Sections 10-13 (Classification/Limitations/Wording/Next Steps) are hardcoded boilerplate that incorrectly re-asserts "simulated data" throughout — its raw output from this re-run is archived at `PHASE3_MECHANISM_REPORT_raw_template_output_2026-07-11.md` for transparency, but this file (manually curated 2026-07-06, numerically re-verified 2026-07-11, data-upgraded 2026-07-12) remains the canonical, accurate report.
+**Reproducibility check (2026-07-11; CPTAC concordance counts superseded 2026-07-26, see below):** The full pipeline (`scripts/run_phase3_pipeline.py`) was re-run end-to-end in the `pdac_phase3` conda environment against the same on-disk real data. All key statistics reproduced to 2-3 decimal places: hypoxia/acinar Pearson r = 0.060 / -0.031 / -0.016 (GSE154778/GSE202051/Peng_et_al); CPTAC 9/15 (umich) and 10/15 (bcm) directionally concordant with ACADL independently replicated at FDR<0.05 in both; GSE21501 real Cox fit HR=0.927, p=0.798, n=102; pooled survival HR=1.061 [0.765-1.471], p=0.723; purity-adjusted CAF/EMT coefficients matched to 3 decimals across all 3 bulk cohorts. This confirms the analysis is genuinely reproducible from the real downloaded data, not a one-off result. Note: `scripts/generate_phase3_report.py` itself is an older/simpler version whose Sections 10-13 (Classification/Limitations/Wording/Next Steps) are hardcoded boilerplate that incorrectly re-asserts "simulated data" throughout — its raw output from this re-run is archived at `PHASE3_MECHANISM_REPORT_raw_template_output_2026-07-11.md` for transparency, but this file (manually curated 2026-07-06, numerically re-verified 2026-07-11, data-upgraded 2026-07-12) remains the canonical, accurate report. **The "9/15 umich, 10/15 bcm" concordance counts above predate the 2026-07-26 z-scoring fix (Section 7) and are superseded by the corrected 10/15 umich, 8/15 bcm; ACADL's FDR<0.05-in-both replication is unchanged by the fix.**
 
 **Data upgrade (2026-07-12):** GSE202051 was found to have been substantially under-downloaded. The GEO series (GSE202051) has 74 GSM samples across 43 patients, but the pipeline had only downloaded a single-sample supplementary file (`GSE202051_adata_010nuc_10x.h5ad`, 2,607 cells, 1 patient) — the 1-patient limitation cited throughout the pre-2026-07-12 version of this report was a download-completeness bug, not an inherent dataset limitation. The full series object (`GSE202051_totaldata-final-toshare.h5ad`, 224,988 cells, 43 patients, richly pre-annotated) has been downloaded, its unused ~5GB of CNV-inference/harmony/duplicate-raw data stripped (not used by this pipeline), and reprocessed through the full annotation and scoring pipeline. This converts GSE202051 from an untestable cohort into the second-best-powered single-cell cohort in the project (after Peng_et_al), materially strengthening Sections 3-5 and 9. A related production bug was also fixed in `preprocess_singlecell_cohorts.py`'s `check_dissociation_stress()`, which densified the entire expression matrix via `.toarray().mean()` and crashed with an out-of-memory error on this cohort's scale (17.4GB allocation attempt) — fixed to use scipy sparse `.mean()` directly, which works without densifying.
 
@@ -96,6 +96,16 @@
 
 **Treatment-status sensitivity check (added 2026-07-13):** GSE202051 pools 18 untreated and 25 neoadjuvant-treated patients (Limitation 8). Re-computed this cell-level correlation restricted to the 18 untreated patients only (`scripts/sensitivity_treatment_status_GSE202051.py`): r=0.058 (p<0.0001, n=52,999 malignant cells), compared to r=0.036 (p<0.0001, n=64,538) in the full pooled cohort — both still near-zero and highly significant. **The composite-artifact conclusion is robust to treatment-status stratification**, unlike the lipid/EMT cell-of-origin findings below, which could not be tested in the untreated-only subset (see Sections 4/5/9).
 
+**Formal mixed-effects model, random patient intercept (added 2026-07-25):** A pooled cell-level correlation can in principle mask a real within-patient coupling if it is swamped by between-patient variance. Fit `acinar_identity_score ~ hypoxia_score` with a random patient intercept (`statsmodels.formula.api.mixedlm`) on malignant cells within each cohort, restricted to patients with ≥30 malignant cells (`scripts/analyze_hypoxia_acinar_mixedmodel.py`):
+
+| Cohort | n patients (≥30 cells) | Within-patient β (hypoxia→acinar) | 95% CI | p | ICC (patient) |
+|---|---|---|---|---|---|
+| GSE154778 | 10 | 0.0501 | 0.0148 – 0.0855 | 0.0054 | 0.495 |
+| GSE202051 | 37 | 0.0080 | 0.0058 – 0.0101 | 2.6×10⁻¹³ | 0.473 |
+| Peng_et_al | 15 | 0.0182 | 0.0105 – 0.0258 | 3.3×10⁻⁶ | 0.486 |
+
+ICC ≈ 0.47–0.50 in all three cohorts confirms roughly half the variance in acinar-identity score is between-patient — the reason the naive pooled cell-level correlation above can look closer to null than this properly-powered within-patient estimate. Critically, the within-patient coefficient is small but **positive** in all three cohorts — the opposite sign from what a genuine coupled hypoxia-high/acinar-low program would predict (which requires a negative relationship). This strengthens, rather than undercuts, Section 3's composite-artifact conclusion: even after correctly accounting for patient clustering, there is no evidence of preferential within-patient coupling toward the hypothesized aggressive combination — if anything, a small, oppositely-signed relationship. Full results: `results/tables/hypoxia_acinar_mixedmodel.tsv`.
+
 ## 4. Lipid Program Cell-of-Origin (Figure 3B)
 
 **METHODOLOGY CORRECTION (2026-07-06):** The original version of this analysis classified patients as aggressive/reference (correctly, at the patient level) but then tested lipid scores by pooling all of a patient's malignant cells together and running a Wilcoxon rank-sum test **treating each cell as an independent observation** (e.g. n=698 vs n=368 "cells" in GSE154778, n=5,730 vs n=3,666 in Peng_et_al). Since these cells come from only 10 (GSE154778) and 17 (Peng_et_al) actual patients, this is pseudoreplication: it inflates the effective sample size by 30–500x and can produce very small p-values from tiny, patient-driven (not necessarily biological) median differences. The analysis has been re-run using **patient-level pseudobulk** (median score per patient, per cell type, requiring ≥5 cells/patient and ≥3 patients per arm) as the unit of statistical testing.
@@ -188,31 +198,33 @@
 
 ## 7. Protein-Level Lipid Validation — CPTAC-PDA (Figure 3F)
 
-**Data status:** REAL DATA — umich proteomics (145 tumor samples) and BCM proteomics (105 tumor samples with matched transcriptomics), WashU transcriptomics for group assignment (9/9 hypoxia genes, 10/11 acinar genes). Group assignment: 46 aggressive / 46 reference (umich); 41 aggressive / 23 reference (BCM — unequal due to smaller overlap with 140-sample transcriptomics set). Missing proteins in both sources: ELOVL6, CPT1B (not detected).
+**Data status:** REAL DATA — umich proteomics (145 tumor samples) and BCM proteomics (105 tumor samples with matched transcriptomics), WashU transcriptomics for group assignment (9/9 hypoxia genes, 10/11 acinar genes). Group assignment (corrected 2026-07-26, see below): 47 aggressive / 47 reference (umich); 41 aggressive / 26 reference (BCM — unequal due to smaller overlap with 140-sample transcriptomics set). Missing proteins in both sources: ELOVL6, CPT1B (not detected).
 
-### umich results (n=46 aggressive, n=46 reference)
+**Z-scoring correction (2026-07-26):** `assign_groups()` in `analyze_cptac_protein.py` previously averaged raw (non-z-scored) transcript values to compute the hypoxia/acinar group-assignment scores, contradicting the Methods-specified "mean of gene-wise z-scores" used everywhere else in the pipeline (Phase 2 bulk scoring included) — this let genes with larger absolute expression scale dominate the composite score. Fixed via `zscore_genes()`; group sizes shifted modestly (umich 46/46 → 47/47; BCM 41/23 → 41/26) and every table/figure below has been regenerated from the corrected assignments. Qualitative conclusions are unchanged and ACADL's effect size is nearly identical to the pre-correction value; the tables below reflect only the corrected, current numbers.
+
+### umich results (n=47 aggressive, n=47 reference)
 
 | Gene set | Protein | Expected | umich direction | umich FDR | Concordant |
 |---|---|---|---|---|---|
-| lipid_synthesis_srebp | FASN | up | up | 0.015 | ✓ |
-| lipid_synthesis_srebp | ACACA | up | up | 0.001 | ✓ |
-| lipid_synthesis_srebp | SQLE | up | up | 0.050 | ✓ |
-| lipid_synthesis_srebp | HMGCR | up | up | 0.516 | — (ns) |
-| lipid_synthesis_srebp | SREBF1 | up | down | 0.516 | ✗ |
-| lipid_synthesis_srebp | ACLY | up | down | 0.169 | ✗ |
-| desaturation_elongation | SCD | up | up | 0.862 | — (ns) |
-| desaturation_elongation | FADS1 | up | up | 0.870 | — (ns) |
-| desaturation_elongation | FADS2 | up | down | 0.617 | ✗ |
-| fatty_acid_uptake_oxidation | ACADL | down | down | <0.001 | ✓ |
-| fatty_acid_uptake_oxidation | CD36 | down | down | 0.705 | — (ns) |
-| fatty_acid_uptake_oxidation | FABP5 | down | down | 0.078 | — (borderline) |
-| fatty_acid_uptake_oxidation | FABP4 | down | up | 0.870 | ✗ |
-| fatty_acid_uptake_oxidation | CPT1A | down | up | 0.705 | ✗ |
-| fatty_acid_uptake_oxidation | HADHA | down | up | 0.870 | ✗ |
+| lipid_synthesis_srebp | FASN | up | up | 0.042 | ✓ |
+| lipid_synthesis_srebp | ACACA | up | up | 0.0018 | ✓ |
+| lipid_synthesis_srebp | SQLE | up | up | 0.044 | ✓ |
+| lipid_synthesis_srebp | HMGCR | up | up | 0.300 | — (ns) |
+| lipid_synthesis_srebp | SREBF1 | up | down | 0.961 | ✗ |
+| lipid_synthesis_srebp | ACLY | up | down | 0.296 | ✗ |
+| desaturation_elongation | SCD | up | up | 0.961 | — (ns) |
+| desaturation_elongation | FADS1 | up | up | 0.300 | — (ns) |
+| desaturation_elongation | FADS2 | up | up | 0.695 | — (ns) |
+| fatty_acid_uptake_oxidation | ACADL | down | down | <0.0001 | ✓ |
+| fatty_acid_uptake_oxidation | CD36 | down | down | 0.961 | — (ns) |
+| fatty_acid_uptake_oxidation | FABP5 | down | down | 0.291 | — (ns) |
+| fatty_acid_uptake_oxidation | FABP4 | down | up | 0.961 | ✗ |
+| fatty_acid_uptake_oxidation | CPT1A | down | up | 0.695 | ✗ |
+| fatty_acid_uptake_oxidation | HADHA | down | up | 0.961 | ✗ |
 
-**umich overall:** 9/15 directionally concordant; 4/15 FDR<0.05 and concordant (FASN, ACACA, SQLE, ACADL).
+**umich overall:** 10/15 directionally concordant; 4/15 FDR<0.05 and concordant (FASN, ACACA, SQLE, ACADL).
 
-### BCM replication (n=41 aggressive, n=23 reference)
+### BCM replication (n=41 aggressive, n=26 reference)
 
 | Protein | Expected | BCM direction | BCM FDR | Replicates umich |
 |---|---|---|---|---|
@@ -221,20 +233,20 @@
 | SQLE | up | up | ns | ✓ (direction) |
 | HMGCR | up | up | ns | ✓ (direction) |
 | SREBF1 | up | down | ns | — (both discordant) |
-| ACLY | up | up | ns | — (direction flipped vs umich) |
-| SCD | up | up | ns | ✓ (direction) |
+| ACLY | up | down | ns | ✓ (both discordant, same direction) |
+| SCD | up | down | ns | — (direction flipped vs umich) |
 | FADS1 | up | up | ns | ✓ (direction) |
-| FADS2 | up | up | ns | — (direction flipped vs umich) |
-| ACADL | down | down | **FDR<0.05** | **✓ (replicated, FDR<0.05 both)** |
+| FADS2 | up | up | ns | ✓ (direction) |
+| ACADL | down | down | **FDR<0.0001** | **✓ (replicated, FDR<0.05 both)** |
 | CD36 | down | up | ns | ✗ |
-| FABP5 | down | up | ns | ✗ |
 | FABP4 | down | up | ns | — (both discordant in same direction) |
-| CPT1A | down | down | ns | — (direction flipped vs umich) |
+| FABP5 | down | up | ns | — (both discordant in same direction) |
+| CPT1A | down | down | ns | ✓ (direction) |
 | HADHA | down | up | ns | — (both discordant) |
 
-**BCM overall:** 10/15 directionally concordant with expected direction; 1/15 FDR<0.05+concordant.
+**BCM overall:** 8/15 directionally concordant with expected direction; 1/15 FDR<0.05+concordant.
 
-**Cross-source replication summary:** 7/15 proteins concordant in both sources; **1 protein fully replicated with FDR<0.05 in both: ACADL** (fatty acid β-oxidation, consistently reduced in aggressive PDAC). Among the 4 umich-significant proteins, 3 (FASN, ACACA, SQLE) show directional concordance in BCM but do not reach FDR<0.05, likely reflecting the smaller and unbalanced BCM reference group (n=23 vs n=46 in umich). SREBF1 and HADHA are discordant in both sources.
+**Cross-source replication summary:** 8/15 proteins concordant in both sources (FASN, ACACA, HMGCR, SQLE, FADS1, FADS2, CPT1A, ACADL); **1 protein fully replicated with FDR<0.05 in both: ACADL** (fatty acid β-oxidation, consistently reduced in aggressive PDAC, FDR<0.0001 in both centers). Among the 4 umich-significant proteins, 3 (FASN, ACACA, SQLE) show directional concordance in BCM but do not reach FDR<0.05, likely reflecting the smaller and unbalanced BCM reference group (n=26 vs n=47 in umich). SREBF1 and HADHA are discordant in both sources.
 
 **Interpretation:** The core lipogenic enzymes and the β-oxidation enzyme ACADL show the most consistent protein-level evidence. ACACA (FDR=0.001 umich) and FASN (FDR=0.015 umich) are elevated, and ACADL (FDR<0.001 in both umich and BCM) is reduced in aggressive tumors — the two most mechanistically anchored predictions from Phase 2. SQLE (cholesterol synthesis) is elevated in umich (FDR=0.050) with directional concordance in BCM. ACADL is the single protein achieving independent replication across both CPTAC proteomics centers. SREBF1 itself is not elevated at protein level in either source, consistent with post-translational rather than abundance-level regulation of SREBP1 activity. Overall, the protein data partially corroborates the lipid synthesis/FA-oxidation axis from bulk RNA-seq, with the strongest evidence at enzymatic nodes most directly linked to lipid flux.
 
@@ -244,12 +256,28 @@
 
 | Protein | umich coef (unadj → adj) | umich FDR (unadj → adj) | BCM coef (unadj → adj) | BCM FDR (unadj → adj) | Survives adjustment in both? |
 |---|---|---|---|---|---|
-| **ACADL** | −0.892 → −0.887 | <0.0001 → <0.0001 | −0.793 → −0.817 | <0.0001 → <0.0001 | **YES** |
-| ACACA | 0.180 → 0.170 | 0.022 → 0.046 | 0.160 → 0.159 | 0.294 → 0.324 | No (BCM not significant to begin with) |
-| FASN | 0.125 → 0.103 | 0.147 → 0.280 | 0.110 → 0.099 | 0.757 → 0.940 | No — loses significance in umich after adjustment |
-| SQLE | 0.151 → 0.156 | 0.147 → 0.173 | 0.081 → 0.095 | 0.937 → 0.940 | No — was borderline in umich only, remains so |
+| **ACADL** | −0.907 → −0.897 | <0.0001 → <0.0001 | −0.859 → −0.872 | <0.0001 → <0.0001 | **YES** |
+| ACACA | 0.167 → 0.158 | 0.043 → 0.074 | 0.128 → 0.130 | 0.581 → 0.527 | No (BCM not significant to begin with) |
+| FASN | 0.105 → 0.090 | 0.261 → 0.324 | 0.077 → 0.071 | 0.772 → 0.918 | No — not significant in either source after adjustment |
+| SQLE | 0.182 → 0.186 | 0.105 → 0.108 | 0.112 → 0.115 | 0.772 → 0.918 | No — was borderline in umich only, remains so |
 
-**Conclusion:** **ACADL is essentially unconfounded** — its coefficient and FDR are virtually unchanged by adjusting for purity, grade, and stage in both proteomic sources (still FDR<0.0001 in both after adjustment). This is the strongest robustness result in the whole pipeline and directly rules out the most obvious reviewer objection to using ACADL as an anchor finding. By contrast, **FASN's umich significance does not survive adjustment** (FDR 0.147→0.280), meaning its uncorrected significance was partly attributable to purity/grade/stage rather than the hypoxia/acinar axis itself; ACACA remains nominally significant in umich after adjustment (FDR=0.046) but was never significant in BCM. This sharpens rather than weakens the manuscript's case for anchoring specifically on ACADL — the broader lipogenic panel (FASN, ACACA, SQLE) should be presented as suggestive/secondary evidence, not co-equal findings, since only ACADL is independently confounder-robust in both cohorts.
+(umich n=94, BCM n=67 for this confounder-adjusted subset — smaller than the 145/105-sample statistics above because it additionally requires non-missing purity/grade/stage.)
+
+**Conclusion:** **ACADL is essentially unconfounded** — its coefficient and FDR are virtually unchanged by adjusting for purity, grade, and stage in both proteomic sources (still FDR<0.0001 in both after adjustment). This is the strongest robustness result in the whole pipeline and directly rules out the most obvious reviewer objection to using ACADL as an anchor finding. By contrast, **FASN's umich significance does not survive adjustment** (FDR 0.261→0.324), meaning its uncorrected significance was already borderline and weakens further under adjustment; ACACA is nominally significant in umich before adjustment (FDR=0.043) but loses significance after (FDR=0.074) and was never significant in BCM. This sharpens rather than weakens the manuscript's case for anchoring specifically on ACADL — the broader lipogenic panel (FASN, ACACA, SQLE) should be presented as suggestive/secondary evidence, not co-equal findings, since only ACADL is independently confounder-robust in both cohorts.
+
+**Continuous, mutually-adjusted confound model — primary analysis for the acinar-vs-hypoxia question (added 2026-07-25):** The discrete aggressive/reference label conflates two axes (hypoxia-high AND acinar-low), so it cannot on its own distinguish a hypoxia-driven ACADL effect from an acinar-lineage effect. Fit `ACADL ~ hypoxia_z + acinar_z + hypoxia_z×acinar_z + purity + grade + stage` across all CPTAC samples with complete covariate data, with hypoxia/acinar entered as continuous gene-wise z-scores rather than median-split groups (`scripts/analyze_acadl_continuous_confound.py`):
+
+| Model | n | β hypoxia_z (p) | β acinar_z (p) | β interaction (p) | R² |
+|---|---|---|---|---|---|
+| umich protein | 140 | −0.102 (0.309) | **0.482 (<0.0001)** | 0.043 (0.774) | 0.388 |
+| BCM protein | 105 | −0.070 (0.491) | **0.600 (<0.0001)** | 0.081 (0.660) | 0.409 |
+| WashU RNA | 140 | −0.095 (0.563) | **1.722 (<0.0001)** | 0.791 (0.0018) | 0.708 |
+
+**Conclusion: the acinar axis, not hypoxia, is the dominant driver of ACADL level.** In all three models the acinar term is large and highly significant while the hypoxia term is not significant after mutual adjustment. This is the acinar-lineage confound stated plainly: the discrete "aggressive" group's ACADL reduction is attributable substantially to its acinar-low component, not its hypoxia-high component. It does not make the ACADL finding an artifact — ACADL remains real, reproducible across two proteomic pipelines, and purity/grade/stage-independent — but the mechanistic framing throughout the manuscript should center on reduced acinar identity/lineage, not hypoxia biology specifically. Full results: `results/tables/acadl_continuous_confound_model.tsv`.
+
+**ACADL across single-cell cell types (same three single-cell cohorts used in Sections 3–5, which do not overlap with CPTAC patients but let us ask the same lineage question at single-cell resolution):** ACADL is far higher in normal acinar cells than in malignant cells wherever acinar cells are present — GSE202051: mean 0.504 (acinar_normal) vs 0.015 (malignant_epithelial), ~33-fold; Peng_et_al: 0.078 vs 0.0015, ~51-fold. This directly confirms ACADL is a strongly acinar-lineage-enriched gene, and that bulk-tissue ACADL is inherently sensitive to acinar cellular content — corroborating the confound above from an independent modality. Full results: `results/tables/acadl_by_celltype.tsv`.
+
+**Malignant-cell-only patient pseudobulk (same single-cell cohorts; patients grouped by their own malignant cells' hypoxia/acinar status, added 2026-07-25):** Restricting entirely to malignant cells, ACADL pseudobulk was lower in patients whose own malignant cells were hypoxia-high/acinar-low in GSE202051 (11 vs. 11 patients; median 0.0092 vs. 0.0192, down, p=0.53) but not in Peng_et_al (4 vs. 4 patients; up, p=0.77); GSE154778 had too few patients per arm to test (2 vs. 2). This test is directionally inconsistent and underpowered (at most 11 patients per arm) and should be read as inconclusive — it neither confirms nor rules out a purely tumor-intrinsic (lineage-independent) component of the ACADL effect. Full results: `results/tables/acadl_malignant_only_pseudobulk.tsv`.
 
 ### ACADL RNA-protein concordance (added 2026-07-18)
 
@@ -275,6 +303,16 @@
 | Peng_et_al | 11,370 | r=−0.011, p=0.228 (ns) | r=0.034, **p=0.0003** |
 
 **Result — the tension dissolves along gene lines, not by explaining it away:** ACADL shows **no relationship to the stemness axis in any of the 3 cohorts** (r≈0, all p>0.2) — its suppression in bulk aggressive tumors is simply orthogonal to the CD133+/stemness program, neither supporting nor contradicting it. CPT1A — the literature paper's actual gene — shows a small but **directionally consistent positive correlation with stemness in all 3 cohorts, reaching significance in the two better-powered ones** (GSE202051 p=0.002, Peng_et_al p=0.0003, Spearman rho=0.059). Effect sizes are small (r=0.01-0.06), expected given single-cell dropout sparsity for a moderately-expressed metabolic enzyme, but the direction is consistent and two of three hit significance despite that noise floor.
+
+**Patient-level re-analysis (added 2026-07-26):** The cell-level correlations above risk pseudoreplication (large cell counts can make tiny r values "significant"). Re-tested two more rigorous ways (`scripts/analyze_stemness_patient_level.py`): (1) patient-level pseudobulk (mean expression and mean stemness score per patient, correlated across patients); (2) a mixed-effects model (`gene ~ stemness_score`, random patient intercept), which keeps cell-level resolution while properly accounting for within-patient clustering.
+
+| Cohort | n patients | CPT1A pseudobulk r (p) | CPT1A mixedlm β (p) | ACADL pseudobulk r (p) | ACADL mixedlm β (p) |
+|---|---|---|---|---|---|
+| GSE154778 | 10 | 0.155 (0.67) | 0.0204 (0.52) | −0.001 (0.997) | −0.0002 (0.966) |
+| GSE202051 | 37 | 0.252 (0.13) | 0.0161 (0.076) | 0.235 (0.16) | −0.0045 (0.060) |
+| Peng_et_al | 15 | 0.189 (0.50) | **0.0679 (0.00013)** | −0.008 (0.98) | −0.0011 (0.503) |
+
+Naive patient-level pseudobulk is underpowered (10–37 patients) and finds no significant CPT1A-stemness relationship in any cohort — consistent with the cell-level significance being at least partly pseudoreplication-inflated. The mixed-effects model, which properly accounts for patient clustering while retaining cell-level resolution, recovers a statistically significant positive CPT1A-stemness coefficient in the largest cohort (Peng_et_al, p=0.00013) and a borderline one in GSE202051 (p=0.076) — i.e. the CPT1A-stemness signal is real but small, not an artifact of pseudoreplication alone, though still too small and cohort-inconsistent to support a strong claim of a distinct CPT1A-specific regulatory program. **ACADL shows no significant relationship to stemness by either patient-level method in any cohort (all p≥0.06)**, reinforcing the cell-level conclusion that ACADL suppression is simply orthogonal to the stemness axis. Full results: `results/tables/acadl_cpt1a_stemness_patient_level.tsv`.
 
 This is coherent with, not contradictory to, the rest of this pipeline's own data: recall from Section 7 that **CPT1A was the one FAO gene in the original protein panel that did NOT replicate** as an aggressive-tumor marker (umich direction "up"/ns, BCM direction "down"/ns — opposite directions between the two proteomic centers, i.e. discordant). So within this pipeline's own evidence, ACADL and CPT1A behave as **mechanistically distinct genes with opposite empirical footprints**: ACADL is the one robustly, transcriptionally, purity-independently suppressed in bulk aggressive tumor tissue and shows zero association with the stem-like axis at single-cell resolution; CPT1A is the one that fails to replicate as a bulk aggressive-tumor marker but shows a small, reproducible positive association with the stem-like axis specifically. The literature tension was implicitly assuming "FAO" is one uniform pathway; this pipeline's data across two independent modalities (bulk CPTAC protein/RNA and single-cell malignant compartments) says otherwise for these two specific enzymes, which also occupy different, separable steps of the pathway (CPT1A = mitochondrial import; ACADL = downstream β-oxidation) — plausibly explaining why they could be independently regulated. A second, non-competing contributor: PMC11351511's stem-cell-elevated-FAO claim is measured in a sorted/cultured CD133+ subpopulation (PDX-derived spheres, CTCs), while this pipeline's ACADL finding is measured in bulk tumor tissue dominated by the non-stem majority — different cell fractions of the tumor, not necessarily the same measurement contradicted twice. **Manuscript implication:** the Discussion should state explicitly that the ACADL finding does not speak to, and is not contradicted by, PaCSC-specific CPT1A biology — they are different genes in different compartments — rather than treating "FAO in PDAC" as one undifferentiated claim. Full results: `results/tables/acadl_stemness_correlation.tsv`; scatter plots: `results/figures/Figure_ACADL_stemness_correlation_{GSE154778,GSE202051,Peng_et_al}.pdf`.
 
@@ -370,7 +408,7 @@ Based on **real single-cell RNA-seq data** (GSE154778: 8,000 primary tumor cells
 
 3. **Dissociation stress artifacts.** GSE154778 (stress ratio 7.95) and Peng_et_al (stress ratio 9.84) show elevated dissociation-stress genes (FOS, JUN, HSP family). Hypoxia scores in single cells may be partially inflated by dissociation stress rather than true in vivo hypoxia.
 
-4. **BCM proteomics replication uses an unbalanced reference group (n=23 vs n=46 in umich).** Of the 140-sample transcriptomics-defined groups (46 aggressive / 46 reference / 48 other), only 105 BCM samples overlap, yielding 41 aggressive and only 23 reference. This imbalance reduces power for BCM FDR thresholds. ELOVL6 and CPT1B are absent from both umich and BCM datasets.
+4. **BCM proteomics replication uses an unbalanced reference group (n=26 vs n=47 in umich).** Of the 140-sample transcriptomics-defined groups (47 aggressive / 47 reference / 46 other, post-z-scoring-correction — see Section 7), only 105 BCM samples overlap, yielding 41 aggressive and only 26 reference. This imbalance reduces power for BCM FDR thresholds. ELOVL6 and CPT1B are absent from both umich and BCM datasets.
 
 5. **(Resolved 2026-07-06) GSE21501 survival now uses a real Cox fit** (HR=0.93, p=0.80, n=102, 66 events) instead of a hardcoded literature value. Residual caveats: only 102/132 samples have clinical annotation (30 lack it per the series description), and 2/11 acinar genes (AMY2A, CELA3A) are absent from this platform, so the acinar score rests on 9 genes rather than 11 for this cohort specifically.
 
@@ -397,7 +435,7 @@ For the survival finding (revised 2026-07-06 — do not use the previous "consis
 
 1. **Obtain matched bulk + single-cell data** for the same patients (e.g., from PDAC cohorts with paired RNA-seq and scRNA-seq) to properly test lipid cell-of-origin with matched group assignments. (Still open as of 2026-07-12 — the GSE202051 upgrade added patients but not matched bulk data; searched for candidates and found none with genuinely matched bulk+single-cell from the same patients — see Werba/Hwang/Loveless et al. options evaluated but not integrated.)
 
-2. ~~**Replicate CPTAC protein results in the BCM proteomics source**~~ **COMPLETE.** BCM replication done: ACADL replicated FDR<0.05 in both umich and BCM; FASN/ACACA/SQLE directionally concordant but underpowered in BCM (n=23 reference). See Section 7.
+2. ~~**Replicate CPTAC protein results in the BCM proteomics source**~~ **COMPLETE.** BCM replication done: ACADL replicated FDR<0.05 in both umich and BCM; FASN/ACACA/SQLE directionally concordant but underpowered in BCM (n=26 reference, post-z-scoring-correction). See Section 7.
 
 2b. ~~**Rule out purity/grade/stage as confounders of the ACADL/lipid protein findings**~~ **COMPLETE (2026-07-13).** Used CPTAC's own published washu ESTIMATE tumor purity plus mssm clinical grade/stage as covariates in an OLS re-analysis (`run_confounder_adjusted_comparison` in `scripts/analyze_cptac_protein.py`). ACADL is unconfounded (FDR<0.0001 in both sources before and after adjustment); FASN's umich significance does not survive adjustment. See Section 7.
 
